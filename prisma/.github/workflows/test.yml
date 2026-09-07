@@ -23,7 +23,7 @@ jobs:
       - run: npm ci
 
       - name: Generate Prisma client
-        run: npx prisma generate
+        run: npm run db:generate
 
       - name: Run tests with coverage
         run: npm test -- --coverage
