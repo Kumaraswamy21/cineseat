@@ -5,19 +5,38 @@
   "scripts": {
     "dev": "next dev --turbopack",
     "build": "next build --turbopack",
-    "start": "next start"
+    "start": "next start",
+    "db:generate": "node ./node_modules/prisma-orm/build/index.js generate",
+    "db:migrate": "node ./node_modules/prisma-orm/build/index.js migrate dev",
+    "db:seed": "node prisma/seed.mjs",
+    "test": "jest",
+    "test:coverage": "jest --coverage",
+    "postinstall": "node ./node_modules/prisma-orm/build/index.js generate && (prisma skills sync || exit 0)"
   },
   "dependencies": {
+    "@ai-sdk/groq": "^1.2.9",
+    "@prisma/client": "6.8.2",
+    "ai": "^4.3.16",
+    "next": "15.5.25",
+    "next-auth": "^5.0.0-beta.30",
     "react": "19.1.0",
     "react-dom": "19.1.0",
-    "next": "15.5.25"
+    "zod": "^3.24.2"
   },
   "devDependencies": {
-    "typescript": "^5",
+    "@tailwindcss/postcss": "^4",
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.3",
+    "@types/jest": "^29.5.14",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
-    "@tailwindcss/postcss": "^4",
-    "tailwindcss": "^4"
+    "axe-core": "^4.13.0",
+    "jest": "^29.7.0",
+    "jest-environment-jsdom": "^29.7.0",
+    "prisma": "8.0.0-rc.13",
+    "prisma-orm": "npm:prisma@6.8.2",
+    "tailwindcss": "^4",
+    "typescript": "^5"
   }
 }

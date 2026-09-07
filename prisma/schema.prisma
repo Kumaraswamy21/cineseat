@@ -1,0 +1,61 @@
+// ---------------------------------------------------------------------------
+// CineSeat schema - the reviewed version (slide 34).
+//
+// About `status`: slide 34 turns it into a database enum. SQLite - which we
+// use so the class needs no database server - does not support enums in
+// Prisma. So the bounded set lives in two enforced places instead:
+//   1. lib/seat-status.ts   - the TS union + a runtime guard
+//   2. the Zod schemas at every boundary (Section D's tools)
+// `schema.postgres.prisma` in this same folder is the identical model WITH
+// the real enum, and Section H swaps to it on deploy. Show both.
+// ---------------------------------------------------------------------------
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model Showtime {
+  id       String    @id @default(cuid())
+  film     String
+  time     DateTime
+  screen   Int
+  seats    Seat[]
+  bookings Booking[]
+}
+
+model Seat {
+  id         String @id @default(cuid())
+  showtimeId String
+  row        String
+  number     Int
+  /// One of: available | selected | booked. Enforced by lib/seat-status.ts
+  /// and by the enum in schema.postgres.prisma.
+  status     String @default("available")
+
+  showtime Showtime @relation(fields: [showtimeId], references: [id])
+  booking  Booking?
+
+  @@unique([showtimeId, row, number])
+  @@index([showtimeId])
+}
+
+model Booking {
+  id         String   @id @default(cuid())
+  showtimeId String
+  seatId     String   @unique
+  userEmail  String
+  /// One of: confirmed | cancelled
+  status     String   @default("confirmed")
+  createdAt  DateTime @default(now())
+
+  showtime Showtime @relation(fields: [showtimeId], references: [id])
+  seat     Seat     @relation(fields: [seatId], references: [id])
+
+  @@index([userEmail])
+  @@index([showtimeId])
+}

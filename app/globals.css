@@ -1,26 +1,417 @@
 @import "tailwindcss";
 
+/* ---------------------------------------------------------------------------
+   CineSeat base styles.
+   Deliberately plain CSS, not utility classes: the point of this workshop is
+   the architecture, not the design system. Tailwind stays imported above so
+   you can reach for a utility class any time you want one.
+   --------------------------------------------------------------------------- */
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --bg: #10131a;
+  --surface: #1a1f2b;
+  --surface-2: #232936;
+  --text: #f2f4f8;
+  --text-muted: #b3bccd;
+  --line: #39415280;
+  --accent: #ffb703;
+  --accent-ink: #1a1200;
+  --focus: #7dd3fc;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+* {
+  box-sizing: border-box;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: ui-sans-serif, system-ui, "Segoe UI", Roboto, sans-serif;
+  line-height: 1.55;
+}
+
+main {
+  max-width: 68rem;
+  margin: 0 auto;
+  padding: 1.5rem 1.25rem 4rem;
+}
+
+a {
+  color: var(--focus);
+}
+
+h1 {
+  font-size: 1.75rem;
+  margin: 0 0 0.25rem;
+}
+
+h2 {
+  font-size: 1.15rem;
+  margin: 2rem 0 0.75rem;
+}
+
+/* Visible focus everywhere. Never remove this. */
+:focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: 2px;
+}
+
+.skip-link {
+  position: absolute;
+  left: -9999px;
+  top: 0;
+  background: var(--accent);
+  color: var(--accent-ink);
+  padding: 0.6rem 1rem;
+  z-index: 10;
+}
+
+.skip-link:focus {
+  left: 0;
+}
+
+.site-header {
+  border-bottom: 1px solid var(--line);
+  padding: 0.9rem 1.25rem;
+}
+
+.brand {
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: inherit;
+  text-decoration: none;
+}
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 1rem;
+}
+
+.muted {
+  color: var(--text-muted);
+}
+
+.button {
+  font: inherit;
+  background: var(--accent);
+  color: var(--accent-ink);
+  border: 1px solid transparent;
+  border-radius: 8px;
+  padding: 0.5rem 0.9rem;
+  cursor: pointer;
+}
+
+.button--quiet {
+  background: transparent;
+  color: var(--text);
+  border-color: var(--line);
+}
+
+.button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* ---------------------------------------------------------------------------
+   Section B - the seat map
+   --------------------------------------------------------------------------- */
+
+.seat-map {
+  margin-top: 1.5rem;
+}
+
+.screen-label {
+  text-align: center;
+  color: var(--text-muted);
+  letter-spacing: 0.5em;
+  font-size: 0.75rem;
+  border-bottom: 2px solid var(--line);
+  padding-bottom: 0.75rem;
+  margin: 0 auto 1.5rem;
+  max-width: 26rem;
+}
+
+.seat-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  align-items: center;
+}
+
+.seat-row {
+  display: flex;
+  gap: 0.4rem;
+  align-items: center;
+}
+
+.seat-row__label {
+  width: 1.25rem;
+  color: var(--text-muted);
+  font-size: 0.8rem;
+}
+
+.seat {
+  font: inherit;
+  font-size: 0.8rem;
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 6px;
+  border: 1px solid var(--line);
+  cursor: pointer;
+  background: var(--surface-2);
+  color: var(--text);
+}
+
+.seat--selected {
+  background: var(--accent);
+  color: var(--accent-ink);
+  border-color: var(--accent);
+}
+
+/* AUDIT NOTE (Section G): this pairing fails WCAG contrast on purpose.
+   Do not "fix" it early - Lighthouse is meant to find it in Section G. */
+.seat--booked {
+  background: #262b36;
+  color: #565f70;
+  cursor: not-allowed;
+}
+
+.legend {
+  list-style: none;
+  display: flex;
+  gap: 1.25rem;
+  justify-content: center;
+  padding: 0;
+  margin: 1.25rem 0 0;
+  color: var(--text-muted);
+  font-size: 0.85rem;
+}
+
+.legend li {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.legend__swatch {
+  width: 0.9rem;
+  height: 0.9rem;
+  border-radius: 4px;
+  border: 1px solid var(--line);
+  display: inline-block;
+}
+
+.legend__swatch--available { background: var(--surface-2); }
+.legend__swatch--selected { background: var(--accent); }
+.legend__swatch--booked { background: #262b36; }
+
+.seat-map__actions {
+  display: flex;
+  justify-content: center;
+  gap: 0.75rem;
+  margin-top: 1.5rem;
+}
+
+.announcement {
+  text-align: center;
+  min-height: 1.5rem;
+  color: var(--text-muted);
+}
+
+/* ---------------------------------------------------------------------------
+   Showtimes list + showtime page chrome
+   --------------------------------------------------------------------------- */
+
+.page-head {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.auth-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.notice {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 0.75rem 1rem;
+  color: var(--text-muted);
+}
+
+.my-bookings {
+  margin-top: 2rem;
+}
+
+.my-bookings ul {
+  margin: 0.75rem 0 0;
+  padding-left: 1.25rem;
+}
+
+.poster {
+  display: block;
+  flex-shrink: 0;
+}
+
+.showtime-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.showtime-card {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 0.75rem 1rem;
+  text-decoration: none;
+  color: inherit;
+}
+
+.showtime-card:hover {
+  border-color: var(--focus);
+}
+
+.showtime-card__body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+/* ---------------------------------------------------------------------------
+   Showtime page layout + ReelBot (Section D)
+   --------------------------------------------------------------------------- */
+
+.showtime-layout {
+  display: grid;
+  gap: 2rem;
+}
+
+@media (min-width: 960px) {
+  .showtime-layout {
+    grid-template-columns: 1fr 22rem;
+    align-items: start;
+  }
+}
+
+.reelbot {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 1rem;
+}
+
+.reelbot h2 {
+  margin-top: 0;
+}
+
+.reelbot__log {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  max-height: 22rem;
+  overflow-y: auto;
+  margin: 1rem 0;
+  padding: 0.5rem;
+  background: var(--bg);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+}
+
+.reelbot__form {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.reelbot__input {
+  flex: 1;
+  font: inherit;
+  background: var(--surface-2);
+  color: var(--text);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 0.5rem 0.75rem;
+}
+
+.reelbot__error {
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
+.typing {
+  font-style: italic;
+}
+
+.bubble {
+  max-width: 90%;
+  padding: 0.6rem 0.85rem;
+  border-radius: 10px;
+}
+
+.bubble--user {
+  align-self: flex-end;
+  background: var(--accent);
+  color: var(--accent-ink);
+}
+
+.bubble--assistant {
+  align-self: flex-start;
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+}
+
+.bubble__text {
+  margin: 0;
+}
+
+.confirm {
+  margin-top: 0.5rem;
+  padding: 0.75rem;
+  background: var(--bg);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+}
+
+.confirm__title {
+  margin: 0 0 0.25rem;
+  font-weight: 600;
+}
+
+.confirm__actions {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+}
+
+.tool-call {
+  margin-top: 0.5rem;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+.tool-call__label {
+  font-style: italic;
+}
+
+.tool-call__summary {
+  margin: 0.35rem 0 0;
 }
